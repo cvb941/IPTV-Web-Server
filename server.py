@@ -1,15 +1,7 @@
 # -*- coding: utf-8 -*-
 
-
-# nastavení serveru
-HOST = "localhost"
-PORT = 8888
-# cesta k souborům
-FILES_DIR = "./"
-
-
 print("Spouští se server...")
-import requests, bottle, json, os
+import requests, bottle, json, os, sys
 from bottle import route, redirect, response, request, static_file, template, run
 from datetime import datetime
 from urllib.parse import urlparse, urlencode, parse_qsl, quote, unquote
@@ -23,6 +15,7 @@ from providers.telly import telly
 from providers.net import net
 from providers.tmobile import tmobile
 from providers.magio import magio
+from providers.magio import login as magio_login
 from providers.orange import orange
 from providers.sweet import sweet
 from providers.touchtv import touchtv
@@ -31,6 +24,11 @@ from providers.lepsitv import lepsitv
 from providers.ivysilani import ivysilani
 import czech_sort
 
+# nastavení serveru
+HOST = os.environ.get('SERVER_PUBLIC_HOST', "localhost")
+PORT = 8888
+# cesta k souborům
+FILES_DIR = "./"
 
 os.system("cls||clear")
 style_home = "./templates/home.tpl"
@@ -810,4 +808,8 @@ def home():
 
 
 if __name__ == "__main__":
-    run(host = HOST, port = PORT, reloader = False)
+    if not magio_login.reg_device():
+        print("Magio device registration error. Exiting.")
+        sys.exit(-1)
+
+    run(host = "0.0.0.0", port = PORT, reloader = False)

@@ -1,22 +1,19 @@
 #-*-coding:utf8;-*-
 
-
-# přihlašovací údaje
-user = ""
-password = ""
-
-
 import requests, os, json, uuid, sys
 
+# přihlašovací údaje
+user = os.environ.get('MAGIO_USERNAME', "")
+password = os.environ.get('MAGIO_PASSWORD', "")
 
 UA = "okhttp/3.12.12"
 dev_id = "ab2731523db7"
 dev_name = "ANDROID-STB"
 
 
-def set_data(data):
+def set_data(data, path):
     json_object = json.dumps(data, indent=4)
-    with open("magio_token.json", "w") as outfile:
+    with open(path, "w") as outfile:
         outfile.write(json_object)
 
 
@@ -35,11 +32,10 @@ def login(dev_type):
         return "", ""
 
 
-def reg_device():
+def reg_device(token_path = "./providers/magio/magio_token.json"):
     accesstoken, refreshtoken = login("OTT_STB")
     if accesstoken == "":
-        input("\nPro ukončení stiskněte klávesu Enter")
-        sys.exit(0)
+        return False
     params={"list": "LIVE", "queryScope": "LIVE"}
     headers = {"authorization": "Bearer " + accesstoken, 'Origin': 'https://www.magiogo.sk', 'Pragma': 'no-cache', 'Referer': 'https://www.magiogo.sk/', 'Sec-Fetch-Mode': 'cors', 'Sec-Fetch-Site': 'cross-site', 'User-Agent': UA}
     id = requests.get("https://skgo.magio.tv/v2/television/channels", params = params, headers = headers).json()["items"][0]["channel"]["channelId"]
@@ -48,13 +44,15 @@ def reg_device():
     req = requests.get("https://skgo.magio.tv/v2/television/stream-url", params = params, headers = headers).json()
     if req["success"] == True:
         accesstoken, refreshtoken = login("OTT_STB")
-        set_data({"accesstoken": accesstoken, "refreshtoken": refreshtoken})
-        print("Přihlášení úspěšné")
+        set_data({"accesstoken": accesstoken, "refreshtoken": refreshtoken}, token_path)
+        print("Magio: Přihlášení úspěšné")
+        return True
     else:
         print(req["errorMessage"].replace("exceeded-max-device-count", "Překročen maximální počet zařízení"))
-    input("\nPro ukončení stiskněte klávesu Enter")
-    sys.exit(0)
+        return False
 
 
 if __name__ == "__main__":
-    reg_device()
+    reg_device(token_path = "magio_token.json")
+    input("\nPro ukončení stiskněte klávesu Enter")
+    sys.exit(0)
