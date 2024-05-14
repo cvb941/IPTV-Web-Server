@@ -231,7 +231,7 @@ def magio_playlist():
     ch = magio.get_channels()
     t = ""
     for x,y in ch.items():
-        t = t + '#EXTINF:-1 provider="Magio GO" group-title="' + y["group"] + '" tvg-logo="' +y["logo"] + '"' + catchup + y["name"].replace(" HD", "") + "\n" + input_stream_ + "http://" + str(HOST) + ":" + str(PORT)  + "/magio/" + str(x) + ".mpd\n"
+        t = t + '#EXTINF:-1 provider="Magio GO" group-title="' + y["group"] + '" tvg-id="' + x + '" tvg-logo="' +y["logo"] + '"' + catchup + y["name"].replace(" HD", "") + "\n" + input_stream_ + "http://" + str(HOST) + ":" + str(PORT)  + "/magio/" + str(x) + ".mpd\n"
     if t != "":
         t = "#EXTM3U\n" + t
     response.content_type = 'text/plain; charset=UTF-8'
